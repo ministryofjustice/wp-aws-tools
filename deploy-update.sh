@@ -1,10 +1,12 @@
 #!/bin/sh
 set -e
 
+ME=$(basename "$0")
+
 USAGE="Deploy a new docker image to an existing WordPress instance in ECS/CloudFormation.
 
 Usage:
-  $0 <cf-stack> <cluster> <image>
+  $ME <cf-stack> <cluster> <image>
 
 Parameters:
   <cf-stack>   Name of the CloudFormation stack.
@@ -12,7 +14,7 @@ Parameters:
   <image>      Name and tag of the docker image to deploy.
 
 Example usage:
-  $0 mystack-dev wp-dev image/to-deploy:1.0.0
+  $ME mystack-dev wp-dev image/to-deploy:1.0.0
 "
 
 if [ -z $1 ] || [ -z $2 ] || [ -z $3 ]
