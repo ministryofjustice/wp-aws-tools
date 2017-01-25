@@ -1,8 +1,29 @@
 #!/bin/sh
+set -e
 
-#CF_STACK="stack-name"
-#CLUSTER="cluster-name"
-#IMAGE="image-name"
+USAGE="Deploy a new docker image to an existing WordPress instance in ECS/CloudFormation.
+
+Usage:
+  $0 <cf-stack> <cluster> <image>
+
+Parameters:
+  <cf-stack>   Name of the CloudFormation stack.
+  <cluster>    Name of the ECS cluster.
+  <image>      Name and tag of the docker image to deploy.
+
+Example usage:
+  $0 mystack-dev wp-dev image/to-deploy:1.0.0
+"
+
+if [ -z $1 ] || [ -z $2 ] || [ -z $3 ]
+then
+	echo "$USAGE"
+	exit 1
+fi
+
+CF_STACK=$1
+CLUSTER=$2
+IMAGE=$3
 
 export AWS_DEFAULT_OUTPUT="text"
 
@@ -13,10 +34,10 @@ echo "Looking up CloudFormation stack"
 
 CF_STACK_DESCRIPTION=$(aws cloudformation describe-stack-resources --stack-name "$CF_STACK")
 
-TASK_ARN=$(echo "$CF_STACK_DESCRIPTION" | grep "STACKRESOURCES\tWebTaskDefinition" | awk '{print $3;}')
+TASK_ARN=$(echo "$CF_STACK_DESCRIPTION" | grep "WebTaskDefinition" | awk '{print $3;}')
 TASK_FAMILY=$(aws ecs describe-task-definition --task-definition "$TASK_ARN" | awk 'NR==1 {print $2;}')
 
-SERVICE_ARN=$(echo "$CF_STACK_DESCRIPTION" | grep "STACKRESOURCES\tWebService" | awk '{print $3;}')
+SERVICE_ARN=$(echo "$CF_STACK_DESCRIPTION" | grep "WebService" | awk '{print $3;}')
 SERVICE_NAME=$(aws ecs describe-services --cluster "$CLUSTER" --service "$SERVICE_ARN" | awk 'NR==1 {print $9;}')
 
 ##
